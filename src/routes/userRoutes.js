@@ -41,4 +41,16 @@ router.get("/nbrcompany", userController.nbrcompany);
 
 router.get("/candidates/count", verifyToken, authorizeRoles("admin"), userController.nbrCandidate);
 
+
+/////////////////  companycondidate_counts ////////////////////
+
+
+router.get("/companycondidate/counts",verifyToken,authorizeRoles("admin"),userController.getAllUserCounts);
+
+
+/////////////////  candidates_last-week ////////////////////
+
+router.get("/candidates/last-week",verifyToken,authorizeRoles("admin"),userController.nbrCandidateLastWeek
+);
+
 module.exports = router;
