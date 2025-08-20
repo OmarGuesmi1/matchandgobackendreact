@@ -159,11 +159,15 @@ module.exports.updateUserInfo = async (req, res) => {
 
 module.exports.nbrcompany = async (req, res) => {
   try {
-    // compter tous les utilisateurs dont le rôle est "company"
+    // Compter tous les utilisateurs dont le rôle est "company"
     const count = await User.countDocuments({ role: "company" });
 
     res.status(200).json({ totalCompanies: count });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Error fetching company count:", error.message); // log côté serveur
+    res.status(500).json({ 
+      message: "Failed to get the number of companies.", 
+      error: error.message 
+    });
   }
 };
