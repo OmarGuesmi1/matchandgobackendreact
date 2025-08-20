@@ -22,6 +22,8 @@ const userSchema = new mongoose.Schema(
         enum: ["admin", "candidate", "company"],
         
     },
+    image_User: { type: String, default: "client.png" },
+
 },
     {
         timestamps: true,

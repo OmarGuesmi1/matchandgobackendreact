@@ -1,4 +1,4 @@
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcrypt"); // for hashing passwords
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 

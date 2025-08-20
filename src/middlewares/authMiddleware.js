@@ -5,6 +5,7 @@ const verifyToken = (req, res, next) => {
     let token;
     /* let authHeader = req.header.Authorization || req.header.authorization; */
     let authHeader = req.headers["authorization"];
+    // console.log(req.headers["authorization"]);
 
     if (authHeader && authHeader.startsWith("Bearer")) {
         token = authHeader.split(" ")[1];
@@ -17,13 +18,13 @@ const verifyToken = (req, res, next) => {
         try{
             const deccode = jwt.verify(token, process.env.JWT_SECRET);
             req.user = deccode;
+
             console.log("decoded user is: ", req.user);
             next();
 
         }catch(err) {
             res.status(400).json({ message: "Invalid token" });
         }
-
 
 }
     else {

@@ -2,6 +2,8 @@ const express = require("express");
 const verifyToken = require("../middlewares/authMiddleware");
 const authorizeRoles = require("../middlewares/roleMiddleware")
 const router = express.Router();
+const uploadfile = require('../middlewares/uploadFile')
+const { updatePhoto } = require("../controllers/userController")
 
 //only admin can access this route
 router.get("/admin", verifyToken, authorizeRoles("admin"), (req, res) => {
@@ -18,5 +20,6 @@ router.get("/candidate", verifyToken,authorizeRoles("admin","candidate","company
     res.json({ message: "welcom candidate" });
 });
 
+router.put("/update-photo",verifyToken,uploadfile.single("image_User"),updatePhoto);
 
 module.exports = router;
