@@ -25,4 +25,11 @@ router.put("/update-photo",verifyToken,uploadfile.single("image_User"),updatePho
 
 router.get("/getAllCandidates", userController.getAllCandidates);
 router.get("/getAllCompany", userController.getAllCompany);
+
+router.delete("/delete/:id", verifyToken, authorizeRoles("admin"), userController.DeleteUserById);
+
+
+router.put("/updateUser",verifyToken,uploadfile.fields([{ name: "logo", maxCount: 1 },{ name: "cover", maxCount: 1 } ]),
+  userController.updateUserInfo
+);
 module.exports = router;
