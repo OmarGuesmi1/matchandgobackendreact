@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/OmarGuesmi1/matchandgobackendreact#readme",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",
@@ -27,8 +28,10 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.17.1",
     "multer": "^2.0.2",
+    "node-fetch": "^2.7.0",
     "nodemon": "^3.1.10",
     "stripe": "^18.4.0",
+    "undici": "^7.14.0",
     "validator": "^13.15.15"
   }
 }
