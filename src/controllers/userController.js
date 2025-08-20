@@ -155,7 +155,7 @@ module.exports.updateUserInfo = async (req, res) => {
   }
 };
 
-
+////////////////// nbr company /////////////////////////////////////
 
 module.exports.nbrcompany = async (req, res) => {
   try {
@@ -169,5 +169,38 @@ module.exports.nbrcompany = async (req, res) => {
       message: "Failed to get the number of companies.", 
       error: error.message 
     });
+  }
+};
+
+
+
+///////////////// nbr condidates ////////////////////////////////
+
+
+module.exports.nbrCandidate = async (req, res) => { 
+  try {
+    // Récupérer le token depuis les headers Authorization
+    const token = req.headers.authorization?.split(" ")[1]; // Bearer token
+    if (!token) 
+      return res.status(401).json({ message: "Access denied. No token provided." });
+
+    // Vérifier et décoder le token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const connectedUser = await User.findById(decoded.id);
+
+    // Vérifier que l'utilisateur est admin
+    if (!connectedUser || connectedUser.role !== "admin") {
+      return res.status(403).json({ message: "Access denied. Only admins can view candidate count." });
+    }
+
+    // Compter les utilisateurs de type candidate
+    const count = await User.countDocuments({ role: "candidate" });
+
+    // Retourner le résultat
+    res.status(200).json({ totalCandidates: count });
+
+  } catch (err) {
+    console.error("Error fetching candidate count:", err.message);
+    res.status(500).json({ message: "Failed to get candidate count.", error: err.message });
   }
 };

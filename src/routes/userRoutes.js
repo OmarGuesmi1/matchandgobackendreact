@@ -33,8 +33,12 @@ router.put("/updateUser",verifyToken,uploadfile.fields([{ name: "logo", maxCount
   userController.updateUserInfo
 );
 
-
+/////////////////  nbrcompany ////////////////////
 
 router.get("/nbrcompany", userController.nbrcompany);
+
+/////////////////  candidates_count ////////////////////
+
+router.get("/candidates/count", verifyToken, authorizeRoles("admin"), userController.nbrCandidate);
 
 module.exports = router;
