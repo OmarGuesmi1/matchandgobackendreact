@@ -154,3 +154,16 @@ module.exports.updateUserInfo = async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 };
+
+
+
+module.exports.nbrcompany = async (req, res) => {
+  try {
+    // compter tous les utilisateurs dont le rôle est "company"
+    const count = await User.countDocuments({ role: "company" });
+
+    res.status(200).json({ totalCompanies: count });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

@@ -32,4 +32,9 @@ router.delete("/delete/:id", verifyToken, authorizeRoles("admin"), userControlle
 router.put("/updateUser",verifyToken,uploadfile.fields([{ name: "logo", maxCount: 1 },{ name: "cover", maxCount: 1 } ]),
   userController.updateUserInfo
 );
+
+
+
+router.get("/nbrcompany", userController.nbrcompany);
+
 module.exports = router;

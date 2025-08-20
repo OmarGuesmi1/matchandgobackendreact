@@ -13,7 +13,7 @@ global.Response = fetch.Response;
 // Import des routes
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
-const geminiRoutes = require("./routes/geminiRoutes"); // 📌 Si tu ajoutes la route Gemini
+const geminiRoutes = require("./routes/geminiRoutes"); 
 
 const app = express();
 
