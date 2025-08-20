@@ -42,3 +42,28 @@ module.exports.updatePhoto = async (req, res) => {
 };
 
 
+module.exports.getAllCandidates = async (req, res) => {
+  try {
+    const candidates = await User.find({ role: "candidate" });
+
+    if (!candidates || candidates.length === 0) {
+      return res.status(404).json({ message: "No candidates found" });
+    }
+
+    res.status(200).json({ candidates });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+module.exports.getAllCompany = async (req, res) => {
+  try {
+    // Find users where role is "company"
+    const companies = await User.find({ role: "company" });
+
+    res.status(200).json({ companies });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
