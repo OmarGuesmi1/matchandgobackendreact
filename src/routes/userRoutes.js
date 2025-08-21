@@ -5,6 +5,7 @@ const router = express.Router();
 const uploadfile = require('../middlewares/uploadFile')
 const { updatePhoto } = require("../controllers/userController")
 const userController = require("../controllers/userController")
+const postController = require("../controllers/postController")
 
 //only admin can access this route
 router.get("/admin", verifyToken, authorizeRoles("admin"), (req, res) => {
@@ -53,4 +54,14 @@ router.get("/companycondidate/counts",verifyToken,authorizeRoles("admin"),userCo
 router.get("/candidates/last-week",verifyToken,authorizeRoles("admin"),userController.nbrCandidateLastWeek
 );
 
+/////////////////  companies-category ////////////////////
+
+router.get("/companies/category/:category", userController.getCompaniesByCategory);
+
+
+/////////////////  posts-create ////////////////////
+
+router.post("/posts/create",verifyToken,authorizeRoles("candidate", "company"),uploadfile.single("photo"), 
+  postController.creerPost
+);
 module.exports = router;

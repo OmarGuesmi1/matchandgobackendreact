@@ -31,11 +31,11 @@ const userSchema = new mongoose.Schema(
         type: String, 
         enum: [
           "Tech",
-          "Advertising / Marketing",
-          "Culture / Media",
-          "Consulting / Audit",
-          "Education / Training",
-          "Finance / Banking"
+          "Advertising-Marketing",
+          "Culture-Media",
+          "Consulting-Audit",
+          "Education-Training",
+          "Finance-Banking"
         ] 
       },      
       founded: { type: Number },
