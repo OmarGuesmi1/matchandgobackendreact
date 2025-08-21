@@ -48,61 +48,64 @@ module.exports.updatePost = async (req, res) => {
     const connectedUser = await User.findById(decoded.id);
 
     if (!connectedUser || !["candidate", "company"].includes(connectedUser.role)) {
-      return res.status(403).json({ message: "Seuls les candidats et entreprises peuvent modifier des posts." });
+      return res.status(403).json({ message: "Only candidates and companies can update posts." });
     }
 
     const postId = req.params.id;
     const post = await Post.findById(postId);
 
-    if (!post) return res.status(404).json({ message: "Post non trouvé." });
+    if (!post) return res.status(404).json({ message: "Post not found." });
     if (!post.author.equals(connectedUser._id)) {
-      return res.status(403).json({ message: "Vous ne pouvez modifier que vos propres posts." });
+      return res.status(403).json({ message: "You can only update your own posts." });
     }
 
-    // Récupérer les données à mettre à jour
+    // Retrieve data to update
     const { content, mediaUrl } = req.body;
     if (content) post.content = content;
     if (mediaUrl) post.mediaUrl = mediaUrl;
     if (req.file) post.photo = `/images/${req.file.filename}`;
 
     await post.save();
-    res.status(200).json({ message: "Post mis à jour avec succès", post });
+    res.status(200).json({ message: "Post updated successfully", post });
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Erreur serveur", error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
 
 
 
 module.exports.removePost = async (req, res) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
-    if (!token) return res.status(401).json({ message: "Access denied. No token provided." });
+    if (!token)
+      return res.status(401).json({ message: "Access denied. No token provided." });
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const connectedUser = await User.findById(decoded.id);
 
-    if (!connectedUser || !["candidate", "company"].includes(connectedUser.role)) {
-      return res.status(403).json({ message: "Seuls les candidats et entreprises peuvent supprimer des posts." });
+    if (!connectedUser || !["candidate", "company", "admin"].includes(connectedUser.role)) {
+      return res.status(403).json({ message: "Only candidates, companies, or admins can delete posts." });
     }
 
     const postId = req.params.id;
     const post = await Post.findById(postId);
 
-    if (!post) return res.status(404).json({ message: "Post non trouvé." });
-    if (!post.author.equals(connectedUser._id)) {
-      return res.status(403).json({ message: "Vous ne pouvez supprimer que vos propres posts." });
+    if (!post) return res.status(404).json({ message: "Post not found." });
+
+    // ✅ Admin can delete any post
+    if (connectedUser.role !== "admin" && post.author.toString() !== connectedUser._id.toString()) {
+      return res.status(403).json({ message: "You can only delete your own posts unless you are an admin." });
     }
 
-    // ⚡ Correction : utiliser deleteOne() sur le document
     await post.deleteOne();
-
-    res.status(200).json({ message: "Post supprimé avec succès" });
+    res.status(200).json({ message: "Post deleted successfully" });
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Erreur serveur", error: error.message });
+    res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+

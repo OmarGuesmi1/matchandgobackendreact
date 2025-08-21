@@ -66,11 +66,13 @@ router.post("/posts/create",verifyToken,authorizeRoles("candidate", "company"),u
 );
 
 
+/////////////////  posts-update ////////////////////
 
-router.put("/updatepost/:id",verifyToken,authorizeRoles("candidate", "company"),uploadfile.single("photo"),postController.updatePost
+router.put("/post/update/:id",verifyToken,authorizeRoles("candidate", "company"),uploadfile.single("photo"),postController.updatePost
 );
 
+/////////////////  posts-delete ////////////////////
 
-router.delete("/post/delete/:id",verifyToken,authorizeRoles("candidate", "company"),postController.removePost
+router.delete("/post/delete/:id",verifyToken,authorizeRoles("candidate", "company","admin"),postController.removePost
 );
 module.exports = router;
