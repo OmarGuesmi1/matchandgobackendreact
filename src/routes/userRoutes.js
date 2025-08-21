@@ -64,4 +64,13 @@ router.get("/companies/category/:category", userController.getCompaniesByCategor
 router.post("/posts/create",verifyToken,authorizeRoles("candidate", "company"),uploadfile.single("photo"), 
   postController.creerPost
 );
+
+
+
+router.put("/updatepost/:id",verifyToken,authorizeRoles("candidate", "company"),uploadfile.single("photo"),postController.updatePost
+);
+
+
+router.delete("/post/delete/:id",verifyToken,authorizeRoles("candidate", "company"),postController.removePost
+);
 module.exports = router;
