@@ -75,4 +75,6 @@ router.put("/post/update/:id",verifyToken,authorizeRoles("candidate", "company")
 
 router.delete("/post/delete/:id",verifyToken,authorizeRoles("candidate", "company","admin"),postController.removePost
 );
+
+
 module.exports = router;

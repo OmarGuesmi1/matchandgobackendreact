@@ -3,6 +3,7 @@ const express = require("express");
 const path = require("path");
 const fetch = require("node-fetch");
 const dbConnect = require("./config/dbConnect");
+const cors = require('cors');
 
 // ✅ Polyfills pour Node 16
 global.fetch = fetch;
@@ -24,6 +25,7 @@ dbConnect();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public"))); // Pour servir des fichiers statiques
+app.use(cors());
 
 // 📌 Routes API
 app.use("/api/auth", authRoutes);
