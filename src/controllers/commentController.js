@@ -55,6 +55,7 @@ module.exports.creercommentaire = async (req, res) => {
 };
 
 
+// ✅ update  commentaire
 
 module.exports.updateCommentaire = async (req, res) => {
   try {
@@ -178,5 +179,41 @@ module.exports.getCommentsByPost = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+///////////////// comment count post ////////////////////
+
+module.exports.countComment = async (req, res) => {
+  try {
+    // Vérifier le token
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ message: "Access denied. No token provided." });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const connectedUser = await User.findById(decoded.id);
+
+    if (!connectedUser || !["candidate", "company"].includes(connectedUser.role)) {
+      return res.status(403).json({ message: "Only candidates and companies can view comments." });
+    }
+
+    // Récupérer le postId depuis l'URL
+    const postId = req.params.id;
+
+    // Vérifier que le post existe
+    const postExists = await Post.exists({ _id: postId });
+    if (!postExists) {
+      return res.status(404).json({ message: "Post not found." });
+    }
+
+    // Compter les commentaires
+    const commentCount = await Comment.countDocuments({ post: postId });
+
+    return res.status(200).json({ commentCount });
+  } catch (error) {
+    console.error("Error while counting comments:", error);
+    return res.status(500).json({ message: "Internal server error." });
   }
 };
