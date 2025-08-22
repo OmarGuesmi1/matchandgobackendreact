@@ -95,4 +95,22 @@ router.put(
   commentController.updateCommentaire
 );
 
+
+
+router.delete(
+  "/comments/:commentId",
+  verifyToken,
+  authorizeRoles("candidate", "company"),
+  commentController.deleteCommentaire
+);
+
+
+router.get(
+  "/posts/:postId/comments",
+  verifyToken,
+  authorizeRoles("candidate", "company", "admin"),
+  commentController.getCommentsByPost
+);
+
+
 module.exports = router;
