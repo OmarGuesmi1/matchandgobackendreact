@@ -88,4 +88,11 @@ router.post(
 );
 
 
+router.put(
+  "/comments/:commentId",
+  verifyToken,
+  authorizeRoles("candidate", "company"),
+  commentController.updateCommentaire
+);
+
 module.exports = router;
