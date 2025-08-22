@@ -102,5 +102,7 @@ router.get("/posts/:postId/comments",verifyToken,authorizeRoles("candidate", "co
 
 router.post("/posts/:id/share",verifyToken,authorizeRoles("candidate", "company"),shareController.sharePost);
 
+/////////////////  share count post ////////////////////
 
+router.get("/posts/:id/share-count",verifyToken,authorizeRoles("candidate", "company"),shareController.getShareCountByPost);
 module.exports = router;

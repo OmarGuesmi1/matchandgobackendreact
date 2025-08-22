@@ -50,3 +50,40 @@ module.exports.sharePost = async (req, res) => {
   }
 };
 
+//////////// number of share post ///////////////
+
+
+module.exports.getShareCountByPost = async (req, res) => {
+  try {
+    // Vérifier le token
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ message: "Access denied. No token provided." });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const connectedUser = await User.findById(decoded.id);
+
+    if (!connectedUser || !["candidate", "company"].includes(connectedUser.role)) {
+      return res.status(403).json({ message: "Only candidates and companies can view shares." });
+    }
+
+    // Récupérer le postId depuis l'URL
+    const postId = req.params.id;
+
+    // Vérifier que le post existe
+    const postExists = await Post.exists({ _id: postId });
+    if (!postExists) {
+      return res.status(404).json({ message: "Post not found." });
+    }
+
+    // Compter les partages
+    const shareCount = await Share.countDocuments({ post: postId });
+
+    return res.status(200).json({ shareCount });
+  } catch (error) {
+    console.error("Error while getting share count:", error);
+    return res.status(500).json({ message: "Internal server error." });
+  }
+};
+
