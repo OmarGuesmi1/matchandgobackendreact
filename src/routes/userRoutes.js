@@ -7,6 +7,7 @@ const { updatePhoto } = require("../controllers/userController")
 const userController = require("../controllers/userController")
 const postController = require("../controllers/postController")
 const commentController = require("../controllers/commentController")
+const shareController = require("../controllers/shareController")
 
 //only admin can access this route
 router.get("/admin", verifyToken, authorizeRoles("admin"), (req, res) => {
@@ -77,40 +78,29 @@ router.put("/post/update/:id",verifyToken,authorizeRoles("candidate", "company")
 router.delete("/post/delete/:id",verifyToken,authorizeRoles("candidate", "company","admin"),postController.removePost
 );
 
+/////////////////  comments-create ////////////////////
 
-
-
-router.post(
-  "/posts/:postId/comments",
-  verifyToken,
-  authorizeRoles("candidate", "company"),
-  commentController.creercommentaire
+router.post("/posts/:postId/comments",verifyToken,authorizeRoles("candidate", "company"),commentController.creercommentaire
 );
 
+/////////////////  comments-update ////////////////////
 
-router.put(
-  "/comments/:commentId",
-  verifyToken,
-  authorizeRoles("candidate", "company"),
-  commentController.updateCommentaire
+router.put("/comments/:commentId",verifyToken,authorizeRoles("candidate", "company"),commentController.updateCommentaire
 );
 
+/////////////////  comments-delete ////////////////////
 
-
-router.delete(
-  "/comments/:commentId",
-  verifyToken,
-  authorizeRoles("candidate", "company"),
-  commentController.deleteCommentaire
+router.delete("/comments/:commentId",verifyToken,authorizeRoles("candidate", "company"),commentController.deleteCommentaire
 );
 
+/////////////////  comments-list ////////////////////
 
-router.get(
-  "/posts/:postId/comments",
-  verifyToken,
-  authorizeRoles("candidate", "company", "admin"),
-  commentController.getCommentsByPost
+router.get("/posts/:postId/comments",verifyToken,authorizeRoles("candidate", "company", "admin"),commentController.getCommentsByPost
 );
+
+/////////////////  share post ////////////////////
+
+router.post("/posts/:id/share",verifyToken,authorizeRoles("candidate", "company"),shareController.sharePost);
 
 
 module.exports = router;
