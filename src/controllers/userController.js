@@ -28,7 +28,7 @@ module.exports.updatePhoto = async (req, res) => {
 
     const updatedUser = await User.findByIdAndUpdate(
       req.user.id,
-      { image_User: req.file.filename },
+      { logo: req.file.filename },
       { new: true }
     );
 
@@ -305,3 +305,5 @@ module.exports.getCompaniesByCategory = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+

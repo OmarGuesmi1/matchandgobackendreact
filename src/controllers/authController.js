@@ -2,26 +2,44 @@ const bcrypt = require("bcrypt"); // for hashing passwords
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 
-const register = async(req, res) => {
-    try {
-    const { username, email, password, role } = req.body;
+const register = async (req, res) => {
+  try {
+    const { username, email, password, role, location, category, founded, size, website, linkedin } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const newUser = new User({
-        username,
-        email,
-        password: hashedPassword,
-        role
+      username,
+      email,
+      password: hashedPassword,
+      role: role || "candidate",
     });
+
+    // 🔥 Si c'est une entreprise, on ajoute les infos spécifiques
+    if (role === "company") {
+      newUser.companyInfo = {
+        location,
+        category,
+        founded,
+        size,
+        website,
+        linkedin
+      };
+    }
+
     await newUser.save();
-    res
-    .status(201)
-    .json({ message: `User registered with username ${username}` });
-} catch (err) {
-res
-    .status(500)
-    .json({ message: "something went wrong" });    }
+
+    res.status(201).json({ 
+      message: `User registered with username ${username}`, 
+      role: newUser.role 
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "something went wrong" });
+  }
 };
+
+
+
 
 
 

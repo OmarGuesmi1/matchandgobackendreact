@@ -6,6 +6,7 @@ const uploadfile = require('../middlewares/uploadFile')
 const { updatePhoto } = require("../controllers/userController")
 const userController = require("../controllers/userController")
 const postController = require("../controllers/postController")
+const commentController = require("../controllers/commentController")
 
 //only admin can access this route
 router.get("/admin", verifyToken, authorizeRoles("admin"), (req, res) => {
@@ -22,7 +23,7 @@ router.get("/candidate", verifyToken,authorizeRoles("admin","candidate","company
     res.json({ message: "welcom candidate" });
 });
 
-router.put("/update-photo",verifyToken,uploadfile.single("image_User"),updatePhoto);
+router.put("/update-photo",verifyToken,uploadfile.single("logo"),updatePhoto);
 
 router.get("/getAllCandidates", userController.getAllCandidates);
 router.get("/getAllCompany", userController.getAllCompany);
@@ -74,6 +75,16 @@ router.put("/post/update/:id",verifyToken,authorizeRoles("candidate", "company")
 /////////////////  posts-delete ////////////////////
 
 router.delete("/post/delete/:id",verifyToken,authorizeRoles("candidate", "company","admin"),postController.removePost
+);
+
+
+
+
+router.post(
+  "/posts/:postId/comments",
+  verifyToken,
+  authorizeRoles("candidate", "company"),
+  commentController.creercommentaire
 );
 
 
