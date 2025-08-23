@@ -8,6 +8,7 @@ const userController = require("../controllers/userController")
 const postController = require("../controllers/postController")
 const commentController = require("../controllers/commentController")
 const shareController = require("../controllers/shareController")
+const replyController = require("../controllers/replyController")
 
 //only admin can access this route
 router.get("/admin", verifyToken, authorizeRoles("admin"), (req, res) => {
@@ -109,5 +110,10 @@ router.get("/posts/:id/share-count",verifyToken,authorizeRoles("candidate", "com
 ///////////////// comment count post ////////////////////
 
 router.get("/posts/:id/comment-count",verifyToken,authorizeRoles("candidate", "company"),commentController.countComment
+);
+
+
+
+router.post("/comments/:commentId/replies",verifyToken,authorizeRoles("candidate", "company"),replyController.creerreplycomment
 );
 module.exports = router;
