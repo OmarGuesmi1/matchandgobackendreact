@@ -69,6 +69,11 @@ router.post("/posts/create",verifyToken,authorizeRoles("candidate", "company"),u
   postController.creerPost
 );
 
+router.get("/posts",verifyToken,
+  authorizeRoles("candidate", "company", "admin"),
+  postController.listPosts
+);
+
 
 /////////////////  posts-update ////////////////////
 
@@ -162,4 +167,5 @@ router.get("/comments/:commentId/reactions",verifyToken,authorizeRoles("candidat
 
 router.get("/replies/:replyId/reactions",verifyToken,authorizeRoles("candidate", "company"),reactionController.listReactionsReply
 );
+
 module.exports = router;

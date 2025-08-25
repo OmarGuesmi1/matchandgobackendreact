@@ -1,7 +1,8 @@
 const jwt = require("jsonwebtoken");
 const Post = require("../models/postModel");
 const User = require("../models/userModel");
-
+const Comment = require("../models/commentModel");
+const Reaction = require("../models/reactionModel");
 module.exports.creerPost = async (req, res) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
@@ -109,3 +110,51 @@ module.exports.removePost = async (req, res) => {
   }
 };
 
+
+
+
+
+
+module.exports.listPosts = async (req, res) => {
+  try {
+    // 🔑 Vérification token
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token)
+      return res
+        .status(401)
+        .json({ message: "Access denied. No token provided." });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const connectedUser = await User.findById(decoded.id);
+
+    if (!connectedUser) {
+      return res.status(403).json({ message: "Invalid user." });
+    }
+
+    // 📌 Récupérer tous les posts + infos de l’auteur
+    const posts = await Post.find()
+      .populate("author", "username role logo")
+      .sort({ createdAt: -1 });
+
+    // 🔄 Ajouter nb de réactions et de commentaires pour chaque post
+    const postsWithCounts = await Promise.all(
+      posts.map(async (post) => {
+        const reactionsCount = await Reaction.countDocuments({ post: post._id });
+        const commentsCount = await Comment.countDocuments({ post: post._id });
+
+        return {
+          ...post.toObject(),
+          reactionsCount,
+          commentsCount,
+        };
+      })
+    );
+
+    return res.status(200).json(postsWithCounts);
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ message: "Erreur serveur.", error: error.message });
+  }
+};
