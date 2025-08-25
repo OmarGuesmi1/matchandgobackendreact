@@ -148,4 +148,12 @@ router.post("/replies/:replyId/reactions",verifyToken,authorizeRoles("candidate"
 router.get("/replies/:replyId/reactions/count",verifyToken,authorizeRoles("candidate", "company"),reactionController.countreactreply
 );
 
+
+
+router.get("/posts/:postId/reactions",verifyToken,authorizeRoles("candidate", "company"),reactionController.listReactionsPost
+);
+
+
+
+
 module.exports = router;
