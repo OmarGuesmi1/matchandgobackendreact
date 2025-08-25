@@ -361,3 +361,97 @@ module.exports.listReactionsComment = async (req, res) => {
     return res.status(500).json({ message: "Erreur serveur.", error: error.message });
   }
 };
+
+
+
+
+module.exports.listReactionsReply = async (req, res) => { 
+  try {
+    // 🔑 Vérif token
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "Access denied. No token provided." });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const connectedUser = await User.findById(decoded.id);
+
+    if (!connectedUser || !["candidate", "company"].includes(connectedUser.role)) {
+      return res.status(403).json({ message: "Seuls les candidats et entreprises peuvent consulter les réactions." });
+    }
+
+    const { replyId } = req.params;
+    if (!replyId) {
+      return res.status(400).json({ message: "replyId requis." });
+    }
+
+    // 🔎 Récup toutes les réactions de la reply + infos utilisateur
+    const reactions = await Reaction.find({ reply: replyId })
+      .populate("user", "username role logo");
+
+    // 🔄 Regrouper par type
+    const grouped = reactions.reduce((acc, reaction) => {
+      if (!acc[reaction.type]) {
+        acc[reaction.type] = { count: 0, users: [] };
+      }
+      acc[reaction.type].count++;
+      acc[reaction.type].users.push({
+        _id: reaction.user._id,
+        username: reaction.user.username,
+        role: reaction.user.role,
+        logo: reaction.user.logo
+      });
+      return acc;
+    }, {});
+
+    return res.status(200).json(grouped);
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Erreur serveur.", error: error.message });
+  }
+};
+
+
+module.exports.listReactionsComment = async (req, res) => {  
+  try {
+    // 🔑 Vérif token
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "Access denied. No token provided." });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const connectedUser = await User.findById(decoded.id);
+
+    if (!connectedUser || !["candidate", "company"].includes(connectedUser.role)) {
+      return res.status(403).json({ message: "Seuls les candidats et entreprises peuvent consulter les réactions." });
+    }
+
+    const { commentId } = req.params;
+    if (!commentId) {
+      return res.status(400).json({ message: "commentId requis." });
+    }
+
+    // 🔎 Récup toutes les réactions du commentaire + infos utilisateur
+    const reactions = await Reaction.find({ comment: commentId })
+      .populate("user", "username role logo");
+
+    // 🔄 Regrouper par type
+    const grouped = reactions.reduce((acc, reaction) => {
+      if (!acc[reaction.type]) {
+        acc[reaction.type] = { count: 0, users: [] };
+      }
+      acc[reaction.type].count++;
+      acc[reaction.type].users.push({
+        _id: reaction.user._id,
+        username: reaction.user.username,
+        role: reaction.user.role,
+        logo: reaction.user.logo
+      });
+      return acc;
+    }, {});
+
+    return res.status(200).json(grouped);
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Erreur serveur.", error: error.message });
+  }
+};

@@ -157,4 +157,9 @@ router.get("/posts/:postId/reactions",verifyToken,authorizeRoles("candidate", "c
 
 router.get("/comments/:commentId/reactions",verifyToken,authorizeRoles("candidate", "company"),reactionController.listReactionsComment
 );
+
+
+
+router.get("/replies/:replyId/reactions",verifyToken,authorizeRoles("candidate", "company"),reactionController.listReactionsReply
+);
 module.exports = router;
