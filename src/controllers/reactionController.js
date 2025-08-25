@@ -222,3 +222,60 @@ module.exports.postreactreply = async (req, res) => {
     return res.status(500).json({ message: "Erreur serveur.", error: error.message });
   }
 };
+
+
+
+
+module.exports.countreactreply = async (req, res) => {
+  try {
+    // 🔑 Vérif token
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "Access denied. No token provided." });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const connectedUser = await User.findById(decoded.id);
+
+    if (!connectedUser || !["candidate", "company"].includes(connectedUser.role)) {
+      return res.status(403).json({ message: "Seuls les candidats et entreprises peuvent consulter les réactions." });
+    }
+
+    const { replyId } = req.params;
+    const { type } = req.query; // 👉 ex: /replies/:replyId/reactions/count?type=like
+
+    if (!replyId) {
+      return res.status(400).json({ error: "Il faut fournir un replyId." });
+    }
+
+    // ✅ Vérifier si la reply existe
+    const reply = await Reply.findById(replyId);
+    if (!reply) {
+      return res.status(404).json({ error: "Reply non trouvée." });
+    }
+
+    // 🔎 Construire le filtre
+    const filter = { reply: replyId, ...(type ? { type } : {}) };
+
+    // 📊 Si type est fourni → renvoyer seulement le count de ce type
+    if (type) {
+      const count = await Reaction.countDocuments(filter);
+      return res.status(200).json({ [type]: count });
+    }
+
+    // 📊 Sinon → renvoyer counts groupés par type
+    const all = await Reaction.aggregate([
+      { $match: { reply: reply._id } },
+      { $group: { _id: "$type", total: { $sum: 1 } } }
+    ]);
+
+    const grouped = all.reduce((acc, r) => {
+      acc[r._id] = r.total;
+      return acc;
+    }, {});
+
+    return res.status(200).json(grouped);
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Erreur serveur.", details: error.message });
+  }
+};

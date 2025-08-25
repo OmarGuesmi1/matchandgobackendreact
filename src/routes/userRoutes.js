@@ -144,5 +144,8 @@ router.post("/replies/:replyId/reactions",verifyToken,authorizeRoles("candidate"
 );
 
 
+// 📌 Count reactions on a reply
+router.get("/replies/:replyId/reactions/count",verifyToken,authorizeRoles("candidate", "company"),reactionController.countreactreply
+);
 
 module.exports = router;
