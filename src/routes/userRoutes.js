@@ -138,6 +138,11 @@ router.get("/comments/:commentId/reactions/count",verifyToken,authorizeRoles("ca
   reactionController.getreacetcount
 );
 
+// 🔹 Ajouter une réaction sur une reply
+router.post("/replies/:replyId/reactions",verifyToken,authorizeRoles("candidate", "company"),
+  reactionController.postreactreply
+);
+
 
 
 module.exports = router;

@@ -3,6 +3,7 @@ const User = require("../models/userModel");
 const Reaction = require("../models/reactionModel");
 const Post = require("../models/postModel");
 const Comment = require("../models/commentModel");
+const Reply = require("../models/replyModel");  // 👈 ajoute ça
 
 /////////////// creatreact ///////////////////
 
@@ -159,6 +160,62 @@ module.exports.getcountcoment = async (req, res) => {
       message: "Compteur récupéré avec succès.",
       total: totalReactions,
       breakdown, // ex: [ { _id: "like", count: 5 }, { _id: "support", count: 2 } ]
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Erreur serveur.", error: error.message });
+  }
+};
+
+
+
+module.exports.postreactreply = async (req, res) => {
+  try {
+    // 🔑 Vérif token
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "Access denied. No token provided." });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const connectedUser = await User.findById(decoded.id);
+
+    if (!connectedUser || !["candidate", "company"].includes(connectedUser.role)) {
+      return res.status(403).json({ message: "Seuls les candidats et entreprises peuvent ajouter une réaction." });
+    }
+
+    const { replyId } = req.params;
+    const { type } = req.body; // 👉 en POST, le type vient du body
+
+    if (!type) {
+      return res.status(400).json({ message: "Le type de réaction est obligatoire." });
+    }
+
+    // ✅ Vérifier l'existence de la reply
+    const reply = await Reply.findById(replyId);
+    if (!reply) {
+      return res.status(404).json({ message: "Reply non trouvée." });
+    }
+
+    // 🔎 Vérifier si l’utilisateur a déjà réagi avec le même type
+    const existingReaction = await Reaction.findOne({
+      user: connectedUser._id,
+      reply: replyId,
+      type,
+    });
+
+    if (existingReaction) {
+      return res.status(400).json({ message: "Vous avez déjà ajouté cette réaction." });
+    }
+
+    // ✅ Créer la réaction
+    const reaction = await Reaction.create({
+      type,
+      user: connectedUser._id,
+      reply: replyId,
+    });
+
+    return res.status(201).json({
+      message: "Réaction ajoutée avec succès sur la reply.",
+      reaction,
     });
   } catch (error) {
     console.error(error);
