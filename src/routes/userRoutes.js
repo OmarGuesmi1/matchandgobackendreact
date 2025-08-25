@@ -9,6 +9,7 @@ const postController = require("../controllers/postController")
 const commentController = require("../controllers/commentController")
 const shareController = require("../controllers/shareController")
 const replyController = require("../controllers/replyController")
+const reactionController = require("../controllers/reactionController")
 
 //only admin can access this route
 router.get("/admin", verifyToken, authorizeRoles("admin"), (req, res) => {
@@ -112,8 +113,31 @@ router.get("/posts/:id/share-count",verifyToken,authorizeRoles("candidate", "com
 router.get("/posts/:id/comment-count",verifyToken,authorizeRoles("candidate", "company"),commentController.countComment
 );
 
-
+///////////////// comment replies ////////////////////
 
 router.post("/comments/:commentId/replies",verifyToken,authorizeRoles("candidate", "company"),replyController.creerreplycomment
 );
+
+///////////////// posts reactions ////////////////////
+
+router.post("/posts/:postId/reactions",verifyToken,authorizeRoles("candidate", "company"),reactionController.creatreact);
+
+///////////////// comment reactions ////////////////////
+
+router.post("/comments/:commentId/reactions",verifyToken,authorizeRoles("candidate", "company"),reactionController.creatreact);
+
+// Count the reactions on a Post
+
+router.get("/posts/:postId/reactions/count",verifyToken,authorizeRoles("candidate", "company"),reactionController.getreacetcount
+);
+
+
+// Count reactions on a Comment
+
+router.get("/comments/:commentId/reactions/count",verifyToken,authorizeRoles("candidate", "company"),
+  reactionController.getreacetcount
+);
+
+
+
 module.exports = router;
