@@ -2,6 +2,8 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 const Post = require("../models/postModel");
 const Comment = require("../models/commentModel"); // adapte le chemin !
+const Reply = require("../models/replyModel");      // 👈 add this
+const Reaction = require("../models/reactionModel"); // 👈 add this
 
 // ✅ Créer un commentaire
 module.exports.creercommentaire = async (req, res) => {
@@ -113,7 +115,7 @@ module.exports.updateCommentaire = async (req, res) => {
 // ✅ Delete a comment
 module.exports.deleteCommentaire = async (req, res) => {
   try {
-    // Vérifier le token
+    // 🔑 Check token
     const token = req.headers.authorization?.split(" ")[1];
     if (!token) {
       return res.status(401).json({ message: "Access denied. No token provided." });
@@ -122,30 +124,39 @@ module.exports.deleteCommentaire = async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const connectedUser = await User.findById(decoded.id);
 
-    // Vérifier rôle
-    if (!connectedUser || !["candidate", "company"].includes(connectedUser.role)) {
-      return res.status(403).json({ message: "Only candidates and companies can delete comments." });
+    // 🔑 Check role
+    if (!connectedUser || !["candidate", "company", "admin"].includes(connectedUser.role)) {
+      return res.status(403).json({ message: "Only candidates, companies, or admins can delete comments." });
     }
 
-    // Récupérer l'ID du commentaire
+    // 📌 Get comment ID
     const { commentId } = req.params;
 
-    // Vérifier que le commentaire existe
+    // 📌 Check if comment exists
     const comment = await Comment.findById(commentId);
     if (!comment) {
       return res.status(404).json({ message: "Comment not found." });
     }
 
-    // Vérifier que l'auteur du commentaire correspond à l'utilisateur connecté
-    if (comment.author.toString() !== connectedUser._id.toString()) {
-      return res.status(403).json({ message: "You can only delete your own comments." });
+    // ✅ Author can delete only their own comment (unless admin)
+    if (
+      connectedUser.role !== "admin" &&
+      comment.author.toString() !== connectedUser._id.toString()
+    ) {
+      return res.status(403).json({ message: "You can only delete your own comments unless you are an admin." });
     }
 
-    // Supprimer le commentaire
+    // 🔄 Delete replies linked to this comment
+    await Reply.deleteMany({ comment: commentId });
+
+    // 🔄 Delete reactions linked to this comment
+    await Reaction.deleteMany({ comment: commentId });
+
+    // 🔄 Finally, delete the comment
     await comment.deleteOne();
 
     res.status(200).json({
-      message: "Comment deleted successfully",
+      message: "Comment, related replies, and reactions deleted successfully",
     });
 
   } catch (error) {
@@ -153,6 +164,7 @@ module.exports.deleteCommentaire = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
 
 
 // ✅ Get all comments for a post
