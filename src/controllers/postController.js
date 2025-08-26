@@ -3,6 +3,9 @@ const Post = require("../models/postModel");
 const User = require("../models/userModel");
 const Comment = require("../models/commentModel");
 const Reaction = require("../models/reactionModel");
+
+
+
 module.exports.creerPost = async (req, res) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
@@ -87,8 +90,13 @@ module.exports.removePost = async (req, res) => {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const connectedUser = await User.findById(decoded.id);
 
-    if (!connectedUser || !["candidate", "company", "admin"].includes(connectedUser.role)) {
-      return res.status(403).json({ message: "Only candidates, companies, or admins can delete posts." });
+    if (
+      !connectedUser ||
+      !["candidate", "company", "admin"].includes(connectedUser.role)
+    ) {
+      return res
+        .status(403)
+        .json({ message: "Only candidates, companies, or admins can delete posts." });
     }
 
     const postId = req.params.id;
@@ -96,22 +104,32 @@ module.exports.removePost = async (req, res) => {
 
     if (!post) return res.status(404).json({ message: "Post not found." });
 
-    // ✅ Admin can delete any post
-    if (connectedUser.role !== "admin" && post.author.toString() !== connectedUser._id.toString()) {
-      return res.status(403).json({ message: "You can only delete your own posts unless you are an admin." });
+    // ✅ Admin peut supprimer n'importe quel post, sinon l'auteur uniquement
+    if (
+      connectedUser.role !== "admin" &&
+      post.author.toString() !== connectedUser._id.toString()
+    ) {
+      return res.status(403).json({
+        message: "You can only delete your own posts unless you are an admin.",
+      });
     }
 
+    // 🔄 Supprimer les commentaires liés
+    await Comment.deleteMany({ post: postId });
+
+    // 🔄 Supprimer les réactions liées
+    await Reaction.deleteMany({ post: postId });
+
+    // 🔄 Supprimer le post
     await post.deleteOne();
-    res.status(200).json({ message: "Post deleted successfully" });
+
+    res.status(200).json({ message: "Post, comments, and reactions deleted successfully" });
 
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
-
-
-
 
 
 
