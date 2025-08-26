@@ -22,8 +22,10 @@ const userSchema = new mongoose.Schema(
         enum: ["admin", "candidate", "company"],
         
     },
-    cover: { type: String, default: "client.png" },
-    logo: { type: String, default: "client.png" },
+    cover_User: {
+            type: String,
+            default: "defaultCover.png" 
+        },    logo: { type: String, default: "client.png" },
     companyInfo: {
       description: { type: String },
       location: { type: String },
