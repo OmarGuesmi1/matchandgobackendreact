@@ -74,6 +74,14 @@ router.get("/posts",verifyToken,
   postController.listPosts
 );
 
+// 📌 Get all posts by a specific user
+router.get(
+  "/:userId/posts",
+  verifyToken,
+  authorizeRoles("candidate", "company", "admin"),
+  postController.listPostsByUser
+);
+
 
 router.delete("/replies/:replyId",verifyToken,authorizeRoles("candidate", "company", "admin"),
   replyController.deletereply
