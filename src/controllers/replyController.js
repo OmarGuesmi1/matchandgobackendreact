@@ -16,7 +16,7 @@ module.exports.creerreplycomment = async (req, res) => {
     const connectedUser = await User.findById(decoded.id);
 
     if (!connectedUser || !["candidate", "company"].includes(connectedUser.role)) {
-      return res.status(403).json({ message: "Seuls les candidats et entreprises peuvent répondre à un commentaire." });
+      return res.status(403).json({ message: "Only candidates and companies can reply to a comment." });
     }
 
     // Récupérer l'id du commentaire depuis l'URL
