@@ -1,11 +1,16 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 const Post = require("../models/postModel");
-const Comment = require("../models/commentModel"); // adapte le chemin !
-const Reply = require("../models/replyModel");      // 👈 add this
-const Reaction = require("../models/reactionModel"); // 👈 add this
+const Comment = require("../models/commentModel"); 
+const Reply = require("../models/replyModel");      
+const Reaction = require("../models/reactionModel");
 
-// ✅ Créer un commentaire
+
+
+
+
+/////////////////////// COMMENT CONTROLLER → create a new comment on a post (only candidate or company) ///////////////////////
+
 module.exports.creercommentaire = async (req, res) => {
   try {
     // Vérifier le token
@@ -57,7 +62,10 @@ module.exports.creercommentaire = async (req, res) => {
 };
 
 
-// ✅ update  commentaire
+
+
+
+/////////////////////// COMMENT CONTROLLER → update an existing comment (only author: candidate or company) ///////////////////////
 
 module.exports.updateCommentaire = async (req, res) => {
   try {
@@ -112,7 +120,9 @@ module.exports.updateCommentaire = async (req, res) => {
 
 
 
-// ✅ Delete a comment
+
+/////////////////////// COMMENT CONTROLLER → delete a comment with its replies and reactions (author or admin only) ///////////////////////
+
 module.exports.deleteCommentaire = async (req, res) => {
   try {
     // 🔑 Check token
@@ -146,17 +156,25 @@ module.exports.deleteCommentaire = async (req, res) => {
       return res.status(403).json({ message: "You can only delete your own comments unless you are an admin." });
     }
 
-    // 🔄 Delete replies linked to this comment
+    // 🔄 Get all replies linked to this comment
+    const replies = await Reply.find({ comment: commentId });
+
+    for (const reply of replies) {
+      // Supprimer les réactions des replies
+      await Reaction.deleteMany({ reply: reply._id });
+    }
+
+    // 🔄 Supprimer les replies eux-mêmes
     await Reply.deleteMany({ comment: commentId });
 
-    // 🔄 Delete reactions linked to this comment
+    // 🔄 Supprimer les réactions liées au commentaire
     await Reaction.deleteMany({ comment: commentId });
 
-    // 🔄 Finally, delete the comment
+    // 🔄 Enfin, supprimer le commentaire
     await comment.deleteOne();
 
     res.status(200).json({
-      message: "Comment, related replies, and reactions deleted successfully",
+      message: "Comment, related replies, and all their reactions deleted successfully",
     });
 
   } catch (error) {
@@ -167,7 +185,11 @@ module.exports.deleteCommentaire = async (req, res) => {
 
 
 
-// ✅ Get all comments for a post
+
+
+
+/////////////////////// COMMENT CONTROLLER → Get all comments for a specific post ///////////////////////
+
 module.exports.getCommentsByPost = async (req, res) => {
   try {
     const { postId } = req.params;
@@ -194,7 +216,11 @@ module.exports.getCommentsByPost = async (req, res) => {
   }
 };
 
-///////////////// comment count post ////////////////////
+
+
+
+
+/////////////////////// COMMENT CONTROLLER → Count comments for a specific post ///////////////////////
 
 module.exports.countComment = async (req, res) => {
   try {

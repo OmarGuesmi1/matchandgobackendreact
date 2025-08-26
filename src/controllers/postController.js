@@ -4,7 +4,13 @@ const User = require("../models/userModel");
 const Comment = require("../models/commentModel");
 const Reaction = require("../models/reactionModel");
 const Share = require("../models/shareModel");
+const Reply = require("../models/replyModel");
 
+
+
+
+
+/////////////////////// POST CONTROLLER → Create a new post ///////////////////////
 
 module.exports.creerPost = async (req, res) => {
   try {
@@ -15,11 +21,11 @@ module.exports.creerPost = async (req, res) => {
     const connectedUser = await User.findById(decoded.id);
 
     if (!connectedUser || !["candidate", "company"].includes(connectedUser.role)) {
-      return res.status(403).json({ message: "Seuls les candidats et entreprises peuvent créer des posts." });
+      return res.status(403).json({ message: "Only candidates and companies can create posts." });
     }
 
     const content = req.body.content;
-    if (!content) return res.status(400).json({ message: "Le contenu du post est requis." });
+    if (!content) return res.status(400).json({ message: "Post content is required." });
 
     // mediaUrl pour les fichiers secondaires et photo pour l'image principale
     const mediaUrl = req.body.mediaUrl || undefined;
@@ -33,15 +39,19 @@ module.exports.creerPost = async (req, res) => {
     });
 
     await post.save();
-    res.status(201).json({ message: "Post créé avec succès", post });
+    res.status(201).json({ message: "Post successfully created", post });
 
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: "Erreur serveur", error: error.message });
+    res.status(500).json({ message: "server error", error: error.message });
   }
 };
 
 
+
+
+
+/////////////////////// POST CONTROLLER → Update an existing post ///////////////////////
 
 module.exports.updatePost = async (req, res) => {
   try {
@@ -81,6 +91,9 @@ module.exports.updatePost = async (req, res) => {
 
 
 
+
+/////////////////////// POST CONTROLLER → Delete a post (and its related data) ///////////////////////
+
 module.exports.removePost = async (req, res) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
@@ -114,10 +127,29 @@ module.exports.removePost = async (req, res) => {
       });
     }
 
-    // 🔄 Supprimer les commentaires liés
+    // 🔄 Chercher les commentaires liés au post
+    const comments = await Comment.find({ post: postId });
+
+    for (const comment of comments) {
+      // 🔄 Supprimer les réactions liées au commentaire
+      await Reaction.deleteMany({ comment: comment._id });
+
+      // 🔄 Supprimer les replies liés au commentaire
+      const replies = await Reply.find({ comment: comment._id });
+
+      for (const reply of replies) {
+        // Supprimer les réactions des replies
+        await Reaction.deleteMany({ reply: reply._id });
+      }
+
+      // Supprimer les replies eux-mêmes
+      await Reply.deleteMany({ comment: comment._id });
+    }
+
+    // Supprimer les commentaires eux-mêmes
     await Comment.deleteMany({ post: postId });
 
-    // 🔄 Supprimer les réactions liées
+    // 🔄 Supprimer les réactions liées directement au post
     await Reaction.deleteMany({ post: postId });
 
     // 🔄 Supprimer les partages liés
@@ -127,7 +159,7 @@ module.exports.removePost = async (req, res) => {
     await post.deleteOne();
 
     res.status(200).json({
-      message: "Post, comments, reactions, and shares deleted successfully"
+      message: "Post and all related comments, replies, reactions, and shares deleted successfully"
     });
 
   } catch (error) {
@@ -138,6 +170,10 @@ module.exports.removePost = async (req, res) => {
 
 
 
+
+
+
+/////////////////////// POST CONTROLLER → Get all posts (with reactions & comments count) ///////////////////////
 
 module.exports.listPosts = async (req, res) => {
   try {
@@ -186,6 +222,8 @@ module.exports.listPosts = async (req, res) => {
 
 
 
+
+/////////////////////// POST CONTROLLER → Get all posts by a specific user (with reactions & comments count) ///////////////////////
 
 module.exports.listPostsByUser = async (req, res) => {
   try {

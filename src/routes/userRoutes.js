@@ -38,153 +38,140 @@ router.put("/updateUser",verifyToken,uploadfile.fields([{ name: "logo", maxCount
   userController.updateUserInfo
 );
 
-/////////////////  nbrcompany ////////////////////
-
-router.get("/nbrcompany", userController.nbrcompany);
-
-/////////////////  candidates_count ////////////////////
-
-router.get("/candidates/count", verifyToken, authorizeRoles("admin"), userController.nbrCandidate);
 
 
-/////////////////  companycondidate_counts ////////////////////
 
 
-router.get("/companycondidate/counts",verifyToken,authorizeRoles("admin"),userController.getAllUserCounts);
+/////////////////////// API returns total companies, candidates, and users, and number of candidates registered in the last 7 days, and the category of the company ///////////////////////
 
+// GET /nbrcompany → returns the total number of registered companies
+router.get("/nbrcompany", userController.nbrcompany);  
 
-/////////////////  candidates_last-week ////////////////////
+// GET /candidates/count → returns the total number of registered candidates (admin only, requires token)
+router.get("/candidates/count", verifyToken, authorizeRoles("admin"), userController.nbrCandidate); 
 
-router.get("/candidates/last-week",verifyToken,authorizeRoles("admin"),userController.nbrCandidateLastWeek
-);
+// GET /companycondidate/counts → returns total counts of companies, candidates, and users (admin only, requires token)
+router.get("/companycondidate/counts",verifyToken,authorizeRoles("admin"),userController.getAllUserCounts); 
 
-/////////////////  companies-category ////////////////////
+//  returns the number of candidates registered in the last 7 days (admin only, requires token)
+router.get("/candidates/last-week",verifyToken,authorizeRoles("admin"),userController.nbrCandidateLastWeek); 
 
+// GET /companies/category/:category → retrieve all companies by a specific category (public route)
 router.get("/companies/category/:category", userController.getCompaniesByCategory);
 
 
-/////////////////  posts-create ////////////////////
-
-router.post("/posts/create",verifyToken,authorizeRoles("candidate", "company"),uploadfile.single("photo"), 
-  postController.creerPost
-);
-
-router.get("/posts",verifyToken,
-  authorizeRoles("candidate", "company", "admin"),
-  postController.listPosts
-);
-
-// 📌 Get all posts by a specific user
-router.get(
-  "/:userId/posts",
-  verifyToken,
-  authorizeRoles("candidate", "company", "admin"),
-  postController.listPostsByUser
-);
-
-router.get(
-  "/:userId/shared-posts",
-  verifyToken,
-  authorizeRoles("candidate", "company", "admin"),
-  shareController.listSharedPostsByUser
-);
 
 
-router.delete("/replies/:replyId",verifyToken,authorizeRoles("candidate", "company", "admin"),
-  replyController.deletereply
-);
 
-/////////////////  posts-update ////////////////////
+/////////////////////// POST & SHARE ROUTES → create, list, share posts and get share counts ///////////////////////
 
-router.put("/post/update/:id",verifyToken,authorizeRoles("candidate", "company"),uploadfile.single("photo"),postController.updatePost
-);
+// create a new post (only candidate or company, requires token, supports photo upload)
+router.post("/posts/create",verifyToken,authorizeRoles("candidate", "company"),uploadfile.single("photo"),postController.creerPost); 
 
-/////////////////  posts-delete ////////////////////
+// GET /posts → retrieve all posts (accessible by candidate, company, or admin, requires token)
+router.get("/posts",verifyToken,authorizeRoles("candidate", "company", "admin"),postController.listPosts);
 
-router.delete("/post/delete/:id",verifyToken,authorizeRoles("candidate", "company","admin"),postController.removePost
-);
+// GET /:userId/posts → retrieve all posts created by a specific user (candidate, company, or admin; requires token)
+router.get("/:userId/posts",verifyToken,authorizeRoles("candidate", "company", "admin"),postController.listPostsByUser);
 
-/////////////////  comments-create ////////////////////
+// PUT /post/update/:id → update an existing post by ID (only candidate or company, requires token, supports photo upload)
+router.put("/post/update/:id",verifyToken,authorizeRoles("candidate", "company"),uploadfile.single("photo"),postController.updatePost);
 
-router.post("/posts/:postId/comments",verifyToken,authorizeRoles("candidate", "company"),commentController.creercommentaire
-);
+// DELETE /post/delete/:id → delete a post by ID (accessible by candidate, company, or admin; requires token)
+router.delete("/post/delete/:id",verifyToken,authorizeRoles("candidate", "company","admin"),postController.removePost);
 
-/////////////////  comments-update ////////////////////
 
-router.put("/comments/:commentId",verifyToken,authorizeRoles("candidate", "company"),commentController.updateCommentaire
-);
 
-/////////////////  comments-delete ////////////////////
 
-router.delete("/comments/:commentId",verifyToken,authorizeRoles("candidate", "company"),commentController.deleteCommentaire
-);
 
-/////////////////  comments-list ////////////////////
+/////////////////////// COMMENT ROUTES → create, list comments ///////////////////////
 
-router.get("/posts/:postId/comments",verifyToken,authorizeRoles("candidate", "company", "admin"),commentController.getCommentsByPost
-);
+// POST /posts/:postId/comments → create a new comment on a post (only candidate or company, requires token)
+router.post("/posts/:postId/comments",verifyToken,authorizeRoles("candidate", "company"),commentController.creercommentaire);
 
-/////////////////  share post ////////////////////
+// PUT /comments/:commentId → update an existing comment by ID (only candidate or company, requires token)
+router.put("/comments/:commentId",verifyToken,authorizeRoles("candidate", "company"),commentController.updateCommentaire);
 
+// DELETE /comments/:commentId → delete a comment by ID (only candidate or company, requires token)
+router.delete("/comments/:commentId",verifyToken,authorizeRoles("candidate", "company"),commentController.deleteCommentaire);
+
+// GET /posts/:postId/comments → retrieve all comments for a specific post (accessible by candidate, company, or admin; requires token)
+router.get("/posts/:postId/comments",verifyToken,authorizeRoles("candidate", "company", "admin"),commentController.getCommentsByPost);
+
+// GET /posts/:id/comment-count → get the total number of comments for a specific post (accessible by candidate or company, requires token)
+router.get("/posts/:id/comment-count",verifyToken,authorizeRoles("candidate", "company"),commentController.countComment);
+
+
+
+
+
+/////////////////////// SHARE POST MODEL → manage post sharing and track share counts ///////////////////////
+
+// POST /posts/:id/share → share a specific post (only candidate or company, requires token)
 router.post("/posts/:id/share",verifyToken,authorizeRoles("candidate", "company"),shareController.sharePost);
 
-/////////////////  share count post ////////////////////
-
+// GET /posts/:id/share-count → get the total number of shares for a specific post (only candidate or company, requires token)
 router.get("/posts/:id/share-count",verifyToken,authorizeRoles("candidate", "company"),shareController.getShareCountByPost);
 
-///////////////// comment count post ////////////////////
+// GET /:userId/shared-posts → retrieve all posts shared by a specific user (candidate, company, or admin; requires token)
+router.get("/:userId/shared-posts",verifyToken,authorizeRoles("candidate", "company", "admin"),shareController.listSharedPostsByUser);
 
-router.get("/posts/:id/comment-count",verifyToken,authorizeRoles("candidate", "company"),commentController.countComment
-);
 
-///////////////// comment replies ////////////////////
 
-router.post("/comments/:commentId/replies",verifyToken,authorizeRoles("candidate", "company"),replyController.creerreplycomment
-);
 
-///////////////// posts reactions ////////////////////
 
+/////////////////////// REPLY ROUTES → manage replies to comments (create, delete, etc.) ///////////////////////
+
+// POST /comments/:commentId/replies → create a reply to a specific comment (only candidate or company, requires token)
+router.post("/comments/:commentId/replies",verifyToken,authorizeRoles("candidate", "company"),replyController.creerreplycomment);
+
+// DELETE /replies/:replyId → delete a reply by ID (accessible by candidate, company, or admin; requires token)
+router.delete("/replies/:replyId",verifyToken,authorizeRoles("candidate", "company", "admin"),replyController.deletereply);
+
+
+
+
+
+/////////////////////// REACTION POST ROUTES → manage reactions on posts (create, list, count) ///////////////////////
+
+// POST /posts/:postId/reactions → add a reaction to a specific post (only candidate or company, requires token)
 router.post("/posts/:postId/reactions",verifyToken,authorizeRoles("candidate", "company"),reactionController.creatreact);
 
-///////////////// comment reactions ////////////////////
+// GET /posts/:postId/reactions/count → get the total number of reactions for a specific post (only candidate or company, requires token)
+router.get("/posts/:postId/reactions/count",verifyToken,authorizeRoles("candidate", "company"),reactionController.getreacetcount);
 
+// GET /posts/:postId/reactions → list all reactions for a specific post (only candidate or company, requires token)
+router.get("/posts/:postId/reactions",verifyToken,authorizeRoles("candidate", "company"),reactionController.listReactionsPost);
+
+
+
+
+
+/////////////////////// COMMENT REACTION ROUTES → manage reactions on comments (create, list, count) ///////////////////////
+
+// POST /comments/:commentId/reactions → add a reaction to a specific comment (only candidate or company, requires token)
 router.post("/comments/:commentId/reactions",verifyToken,authorizeRoles("candidate", "company"),reactionController.creatreact);
 
-// Count the reactions on a Post
+// GET /comments/:commentId/reactions/count → get the total number of reactions for a specific comment (only candidate or company, requires token)
+router.get("/comments/:commentId/reactions/count",verifyToken,authorizeRoles("candidate", "company"),reactionController.getreacetcount);
 
-router.get("/posts/:postId/reactions/count",verifyToken,authorizeRoles("candidate", "company"),reactionController.getreacetcount
-);
-
-
-// Count reactions on a Comment
-
-router.get("/comments/:commentId/reactions/count",verifyToken,authorizeRoles("candidate", "company"),
-  reactionController.getreacetcount
-);
-
-// 🔹 Ajouter une réaction sur une reply
-router.post("/replies/:replyId/reactions",verifyToken,authorizeRoles("candidate", "company"),
-  reactionController.postreactreply
-);
-
-
-// 📌 Count reactions on a reply
-router.get("/replies/:replyId/reactions/count",verifyToken,authorizeRoles("candidate", "company"),reactionController.countreactreply
-);
+// GET /comments/:commentId/reactions → list all reactions for a specific comment (only candidate or company, requires token)
+router.get("/comments/:commentId/reactions",verifyToken,authorizeRoles("candidate", "company"),reactionController.listReactionsComment);
 
 
 
-router.get("/posts/:postId/reactions",verifyToken,authorizeRoles("candidate", "company"),reactionController.listReactionsPost
-);
 
 
+/////////////////////// REPLY REACTION ROUTES → manage reactions on replies (create, list, count) ///////////////////////
 
-router.get("/comments/:commentId/reactions",verifyToken,authorizeRoles("candidate", "company"),reactionController.listReactionsComment
-);
+// POST /replies/:replyId/reactions → add a reaction to a specific reply (only candidate or company, requires token)
+router.post("/replies/:replyId/reactions",verifyToken,authorizeRoles("candidate", "company"),reactionController.postreactreply);
 
+// GET /replies/:replyId/reactions/count → get the total number of reactions for a specific reply (only candidate or company, requires token)
+router.get("/replies/:replyId/reactions/count",verifyToken,authorizeRoles("candidate", "company"),reactionController.countreactreply);
 
+// GET /replies/:replyId/reactions → list all reactions for a specific reply (only candidate or company, requires token)
+router.get("/replies/:replyId/reactions",verifyToken,authorizeRoles("candidate", "company"),reactionController.listReactionsReply);
 
-router.get("/replies/:replyId/reactions",verifyToken,authorizeRoles("candidate", "company"),reactionController.listReactionsReply
-);
 
 module.exports = router;

@@ -4,7 +4,10 @@ const Post = require("../models/postModel");
 const Share = require("../models/shareModel");
 
 
-//////////// sharePost ///////////////
+
+
+
+/////////////////////// POST CONTROLLER → Share a post ///////////////////////
 
 module.exports.sharePost = async (req, res) => {
   try {
@@ -50,8 +53,11 @@ module.exports.sharePost = async (req, res) => {
   }
 };
 
-//////////// number of share post ///////////////
 
+
+
+
+/////////////////////// POST CONTROLLER → Get share count by post ///////////////////////
 
 module.exports.getShareCountByPost = async (req, res) => {
   try {
@@ -88,6 +94,10 @@ module.exports.getShareCountByPost = async (req, res) => {
 };
 
 
+
+
+
+/////////////////////// USER CONTROLLER → Get all shared posts by a user ///////////////////////
 
 module.exports.listSharedPostsByUser = async (req, res) => {
   try {

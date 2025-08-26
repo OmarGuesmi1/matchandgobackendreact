@@ -5,6 +5,11 @@ const Reply = require("../models/replyModel");
 const Reaction = require("../models/reactionModel"); // 👈 add this
 
 
+
+
+
+/////////////////////// COMMENT CONTROLLER → Create reply for a specific comment ///////////////////////
+
 module.exports.creerreplycomment = async (req, res) => {
   try {
     const token = req.headers.authorization?.split(" ")[1];
@@ -26,7 +31,7 @@ module.exports.creerreplycomment = async (req, res) => {
     // Vérifier que le commentaire existe
     const comment = await Comment.findById(commentId);
     if (!comment) {
-      return res.status(404).json({ message: "Commentaire introuvable." });
+      return res.status(404).json({ message: "Comment not found." });
     }
 
     // Créer la reply
@@ -37,18 +42,21 @@ module.exports.creerreplycomment = async (req, res) => {
     });
 
     return res.status(201).json({
-      message: "Réponse créée avec succès ✅",
+      message: "Response successfully created",
       reply,
     });
 
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Erreur serveur", error: error.message });
+    return res.status(500).json({ message: "server error", error: error.message });
   }
 };
 
 
-///////////////  delete reply  /////////////
+
+
+
+/////////////////////// REPLY CONTROLLER → Delete reply ///////////////////////
 
 module.exports.deletereply = async (req, res) => {
   try {
