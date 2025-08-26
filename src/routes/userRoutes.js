@@ -75,6 +75,10 @@ router.get("/posts",verifyToken,
 );
 
 
+router.delete("/replies/:replyId",verifyToken,authorizeRoles("candidate", "company", "admin"),
+  replyController.deletereply
+);
+
 /////////////////  posts-update ////////////////////
 
 router.put("/post/update/:id",verifyToken,authorizeRoles("candidate", "company"),uploadfile.single("photo"),postController.updatePost
