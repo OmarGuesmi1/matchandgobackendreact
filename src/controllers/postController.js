@@ -3,7 +3,7 @@ const Post = require("../models/postModel");
 const User = require("../models/userModel");
 const Comment = require("../models/commentModel");
 const Reaction = require("../models/reactionModel");
-
+const Share = require("../models/shareModel");
 
 
 module.exports.creerPost = async (req, res) => {
@@ -120,16 +120,22 @@ module.exports.removePost = async (req, res) => {
     // 🔄 Supprimer les réactions liées
     await Reaction.deleteMany({ post: postId });
 
-    // 🔄 Supprimer le post
+    // 🔄 Supprimer les partages liés
+    await Share.deleteMany({ post: postId });
+
+    // 🔄 Supprimer le post lui-même
     await post.deleteOne();
 
-    res.status(200).json({ message: "Post, comments, and reactions deleted successfully" });
+    res.status(200).json({
+      message: "Post, comments, reactions, and shares deleted successfully"
+    });
 
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
 
 
 
