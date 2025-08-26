@@ -89,3 +89,42 @@ module.exports.getShareCountByPost = async (req, res) => {
 
 
 
+module.exports.listSharedPostsByUser = async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "Access denied. No token provided." });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const connectedUser = await User.findById(decoded.id);
+
+    if (!connectedUser) {
+      return res.status(403).json({ message: "Invalid user." });
+    }
+
+    // 📌 Récupérer userId depuis params
+    const { userId } = req.params;
+
+    // 🔒 Seul l'owner ou un admin peut voir ses partages
+    if (connectedUser._id.toString() !== userId && connectedUser.role !== "admin") {
+      return res.status(403).json({ message: "Access denied. You can only view your own shared posts." });
+    }
+
+    // 📌 Chercher dans Share, pas dans Post
+    const sharedPosts = await Share.find({ sharedBy: userId })
+      .populate("sharedBy", "username role logo") // infos de celui qui partage
+      .populate({
+        path: "post", // le post partagé
+        populate: { path: "author", select: "username role logo" } // auteur du post original
+      })
+      .sort({ createdAt: -1 });
+
+    if (!sharedPosts.length) {
+      return res.status(404).json({ message: "No shared posts found for this user." });
+    }
+
+    return res.status(200).json(sharedPosts);
+  } catch (error) {
+    console.error("Error while fetching shared posts:", error);
+    return res.status(500).json({ message: "Server error", error: error.message });
+  }
+};

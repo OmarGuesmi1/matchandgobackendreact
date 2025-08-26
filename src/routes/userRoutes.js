@@ -82,6 +82,13 @@ router.get(
   postController.listPostsByUser
 );
 
+router.get(
+  "/:userId/shared-posts",
+  verifyToken,
+  authorizeRoles("candidate", "company", "admin"),
+  shareController.listSharedPostsByUser
+);
+
 
 router.delete("/replies/:replyId",verifyToken,authorizeRoles("candidate", "company", "admin"),
   replyController.deletereply
