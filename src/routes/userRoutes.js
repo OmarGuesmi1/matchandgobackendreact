@@ -80,6 +80,8 @@ router.put("/post/update/:id",verifyToken,authorizeRoles("candidate", "company")
 // DELETE /post/delete/:id → delete a post by ID (accessible by candidate, company, or admin; requires token)
 router.delete("/post/delete/:id",verifyToken,authorizeRoles("candidate", "company","admin"),postController.removePost);
 
+// 🔓 Route publique (pas besoin de token)
+router.get("/getpostwithmanyreaction",postController.listpostwithmanyreaction);
 
 
 

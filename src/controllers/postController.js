@@ -279,3 +279,41 @@ module.exports.listPostsByUser = async (req, res) => {
 
 
 
+
+/////////////////////// POST CONTROLLER → Get posts with many reactions & comments ///////////////////////
+
+module.exports.listpostwithmanyreaction = async (req, res) => {
+  try {
+    // 📌 Récupérer tous les posts + infos de l’auteur
+    const posts = await Post.find()
+      .populate("author", "username role logo")
+      .sort({ createdAt: -1 });
+
+    // 🔄 Ajouter nb de réactions pour chaque post
+    const postsWithCounts = await Promise.all(
+      posts.map(async (post) => {
+        const reactionsCount = await Reaction.countDocuments({ post: post._id });
+
+        return {
+          ...post.toObject(),
+          reactionsCount,
+        };
+      })
+    );
+
+    // 🔥 Filtrer uniquement les posts qui ont > 5 réactions
+    const filteredPosts = postsWithCounts.filter(
+      (post) => post.reactionsCount >= 5
+    );
+
+    // 🔥 Trier par nb de réactions décroissant
+    filteredPosts.sort((a, b) => b.reactionsCount - a.reactionsCount);
+
+    return res.status(200).json(filteredPosts);
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ message: "Erreur serveur.", error: error.message });
+  }
+};
