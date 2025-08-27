@@ -39,7 +39,8 @@ router.put("/updateUser",verifyToken,uploadfile.fields([{ name: "logo", maxCount
 );
 
 
-
+// Update user photo
+router.put("/update-photo",verifyToken,uploadfile.single("logo"), updatePhoto);
 
 
 /////////////////////// API returns total companies, candidates, and users, and number of candidates registered in the last 7 days, and the category of the company ///////////////////////

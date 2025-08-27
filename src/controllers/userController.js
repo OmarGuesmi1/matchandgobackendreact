@@ -110,7 +110,7 @@ module.exports.DeleteUserById = async (req, res) => {
 module.exports.updateUserInfo = async (req, res) => {
   try {
     const userId = req.user.id; 
-    const { username, image_User, companyInfo } = req.body || {};
+    const { username, logo, companyInfo } = req.body || {};
 
     const updateData = {};
 
@@ -124,8 +124,8 @@ module.exports.updateUserInfo = async (req, res) => {
     }
 
    
-    if (image_User) {
-      updateData.image_User = image_User;
+    if (logo) {
+      updateData.logo = logo;
     }
 
 
