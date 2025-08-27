@@ -57,7 +57,7 @@ router.get("/companycondidate/counts",verifyToken,authorizeRoles("admin"),userCo
 router.get("/candidates/last-week",verifyToken,authorizeRoles("admin"),userController.nbrCandidateLastWeek); 
 
 // GET /companies/category/:category → retrieve all companies by a specific category (public route)
-router.get("/companies/category/:category", userController.getCompaniesByCategory);
+router.get("/getCompaniesByCategory/:category", userController.getCompaniesByCategory);
 
 
 

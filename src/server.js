@@ -1,13 +1,11 @@
-require("dotenv").config();
 const express = require("express");
-const path = require("path");
+const dotenv = require("dotenv").config();
 const fetch = require("node-fetch");
-const dbConnect = require("./config/dbConnect");
-const cors = require('cors');
+const dbConnect = require("./config/dbConnect"); 
 const notificationRoutes = require("./routes/notificationRoutes");
 
 
-// ✅ Polyfills pour Node 16
+// Gemini
 global.fetch = fetch;
 global.Headers = fetch.Headers;
 global.Request = fetch.Request;
@@ -23,24 +21,23 @@ const quizRoutes = require("./routes/quizRoutes");
 const applicationRoutes = require("./routes/applicationRoutes");
 const interviewRoutes = require("./routes/interviewRoutes");
 
-const app = express();
-const server = require("http").createServer(app);
-
-// 📌 Connexion à la base de données
-dbConnect();
-
-
+const cors = require("cors");
 
 // Socket utils
 const { initSocket } = require("./utils/socket");
 
-// 📌 Middlewares
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "public"))); // Pour servir des fichiers statiques
-app.use(cors());
+// Connect to DB
+dbConnect();
 
-// 📌 Routes API
+// App configuration
+const app = express();
+const server = require("http").createServer(app);
+
+// Middleware
+app.use(cors({ origin: "http://localhost:3000" }));
+app.use(express.json());
+
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/gemini", geminiRoutes); 
@@ -50,20 +47,17 @@ app.use("/api/quiz", quizRoutes);
 app.use("/api/notify", notificationRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/interviews", interviewRoutes);
+app.use('/images', express.static('public/images'));
 
-// 📌 Middleware de gestion des erreurs global
-app.use((err, req, res, next) => {
-    console.error("❌ Error:", err.message);
-    res.status(err.status || 500).json({ message: err.message || "Internal Server Error" });
-});
 
-// 📌 Lancement du serveur
+
 const PORT = process.env.PORT || 7002;
-app.listen(PORT, () => {
-    console.log(`✅ Server is running at http://localhost:${PORT}`);
+server.listen(PORT, () => {
+    console.log(`Server is running at port ${PORT}`);
 });
 
 
 initSocket(server);
 
 
+module.exports = server;

@@ -25,19 +25,20 @@ const userSchema = new mongoose.Schema(
     cover_User: {
             type: String,
             default: "defaultCover.png" 
-        },    logo: { type: String, default: "client.png" },
+        }, 
+    logo: { type: String, default: "client.png" },
     companyInfo: {
       description: { type: String },
       location: { type: String },
       category: { 
         type: String, 
         enum: [
-          "Tech",
-          "Advertising-Marketing",
-          "Culture-Media",
-          "Consulting-Audit",
-          "Education-Training",
-          "Finance-Banking"
+            "Tech",
+            "Advertising&Marketing",
+            "Culture&Media",
+            "Consulting&Audit",
+            "Education&Training",
+            "Finance&Banking"
         ] 
       },      
       founded: { type: Number },
