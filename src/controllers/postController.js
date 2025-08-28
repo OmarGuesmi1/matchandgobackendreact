@@ -289,14 +289,18 @@ module.exports.listpostwithmanyreaction = async (req, res) => {
       .populate("author", "username role logo")
       .sort({ createdAt: -1 });
 
-    // 🔄 Ajouter nb de réactions pour chaque post
+    // 🔄 Ajouter nb de réactions, commentaires et partages pour chaque post
     const postsWithCounts = await Promise.all(
       posts.map(async (post) => {
         const reactionsCount = await Reaction.countDocuments({ post: post._id });
+        const commentsCount = await Comment.countDocuments({ post: post._id });
+        const sharesCount = await Share.countDocuments({ post: post._id });
 
         return {
           ...post.toObject(),
           reactionsCount,
+          commentsCount,
+          sharesCount,
         };
       })
     );
