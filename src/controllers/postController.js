@@ -27,15 +27,18 @@ module.exports.creerPost = async (req, res) => {
     const content = req.body.content;
     if (!content) return res.status(400).json({ message: "Post content is required." });
 
-    // mediaUrl pour les fichiers secondaires et photo pour l'image principale
     const mediaUrl = req.body.mediaUrl || undefined;
-    const photo = req.file ? `/images/${req.file.filename}` : undefined;
+
+    // ✅ gestion des fichiers
+    const photo = req.files?.photo ? `/images/${req.files.photo[0].filename}` : undefined;
+    const document = req.files?.document ? `/images/${req.files.document[0].filename}` : undefined;
 
     const post = new Post({
       author: connectedUser._id,
       content,
       mediaUrl,
-      photo
+      photo,
+      document
     });
 
     await post.save();

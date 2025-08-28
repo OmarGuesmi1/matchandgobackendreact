@@ -67,7 +67,16 @@ router.get("/getCompaniesByCategory/:category", userController.getCompaniesByCat
 /////////////////////// POST & SHARE ROUTES → create, list, share posts and get share counts ///////////////////////
 
 // create a new post (only candidate or company, requires token, supports photo upload)
-router.post("/posts/create",verifyToken,authorizeRoles("candidate", "company"),uploadfile.single("photo"),postController.creerPost); 
+router.post(
+  "/posts/create",
+  verifyToken,
+  authorizeRoles("candidate", "company"),
+  uploadfile.fields([
+    { name: "photo", maxCount: 1 },
+    { name: "document", maxCount: 1 }
+  ]),
+  postController.creerPost
+);
 
 // GET /posts → retrieve all posts (accessible by candidate, company, or admin, requires token)
 router.get("/posts",verifyToken,authorizeRoles("candidate", "company", "admin"),postController.listPosts);
