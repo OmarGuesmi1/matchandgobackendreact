@@ -194,27 +194,30 @@ module.exports.getCommentsByPost = async (req, res) => {
   try {
     const { postId } = req.params;
 
-    // Vérifier que le post existe
+    // 🔹 Vérifier que le post existe
     const post = await Post.findById(postId);
     if (!post) {
       return res.status(404).json({ message: "Post not found." });
     }
 
-    // Récupérer les commentaires liés à ce post
+    // 🔹 Récupérer les commentaires liés à ce post
     const comments = await Comment.find({ post: postId })
-      .populate("author", "username email role") // ramène juste quelques infos de l'auteur
-      .sort({ createdAt: -1 }); // les plus récents en premier
+      .populate("author", "username logo role") // récupère juste les infos utiles de l'auteur
+      .sort({ createdAt: -1 }); // optionnel : les plus récents en premier
 
+    // 🔹 Envoyer tous les commentaires
     res.status(200).json({
       message: "Comments fetched successfully",
       count: comments.length,
-      comments,
+      comments, // chaque commentaire contient { _id, content, author: { username, logo, role } }
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+
 
 
 
