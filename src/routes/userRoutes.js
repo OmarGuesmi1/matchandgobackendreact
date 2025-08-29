@@ -186,4 +186,31 @@ router.get("/replies/:replyId/reactions/count",verifyToken,authorizeRoles("candi
 router.get("/replies/:replyId/reactions",verifyToken,authorizeRoles("candidate", "company"),reactionController.listReactionsReply);
 
 
+
+
+
+
+router.delete(
+  "/posts/:postId/reactions",
+  verifyToken,
+  authorizeRoles("candidate", "company"),
+  reactionController.removeReaction
+);
+
+// Supprimer reaction sur un commentaire
+router.delete(
+  "/comments/:commentId/reactions",
+  verifyToken,
+  authorizeRoles("candidate", "company"),
+  reactionController.removeReaction
+);
+
+// Supprimer reaction sur une réponse (reply)
+router.delete(
+  "/replies/:replyId/reactions",
+  verifyToken,
+  authorizeRoles("candidate", "company"),
+  reactionController.removeReaction
+);
+
 module.exports = router;

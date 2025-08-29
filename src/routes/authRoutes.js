@@ -11,10 +11,11 @@ router.post("/login", login);
 ///////
 router.get("/me", verifyToken, async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    // on sélectionne uniquement les champs utiles
+    const user = await User.findById(req.user.id).select("username logo email role");
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    res.json(user);
+    res.json({ user }); // ✅ renvoie toujours { user: {...} }
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
